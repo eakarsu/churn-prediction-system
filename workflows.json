@@ -1,0 +1,754 @@
+{
+  "version": 1,
+  "appId": "churn-prediction-system",
+  "workflows": [
+    {
+      "id": "customer-profile-intake",
+      "title": "Customer Profile Intake",
+      "description": "Create a consent-aware customer profile with lifecycle, segment, ownership, and value inputs.",
+      "fields": [
+        {
+          "key": "customerReference",
+          "label": "Customer reference",
+          "type": "text",
+          "required": true,
+          "default": "CUS-DEMO-2048"
+        },
+        {
+          "key": "segment",
+          "label": "Segment",
+          "type": "select",
+          "required": true,
+          "options": [
+            "Consumer",
+            "SMB",
+            "Mid-market",
+            "Enterprise"
+          ],
+          "default": "Mid-market"
+        },
+        {
+          "key": "lifecycleStage",
+          "label": "Lifecycle stage",
+          "type": "select",
+          "required": true,
+          "options": [
+            "Trial",
+            "New",
+            "Active",
+            "At risk",
+            "Churned"
+          ],
+          "default": "Active"
+        },
+        {
+          "key": "accountOwner",
+          "label": "Account owner",
+          "type": "text",
+          "required": true,
+          "default": "Demo Success Manager"
+        },
+        {
+          "key": "contactConsent",
+          "label": "Contact consent",
+          "type": "select",
+          "required": true,
+          "options": [
+            "Needs verification",
+            "Granted",
+            "Declined"
+          ],
+          "default": "Needs verification"
+        }
+      ],
+      "states": [
+        "draft",
+        "validated",
+        "active",
+        "suppressed"
+      ],
+      "transitions": [
+        {
+          "id": "customer-profile-intake-validated",
+          "label": "Move to validated",
+          "from": [
+            "draft"
+          ],
+          "to": "validated"
+        },
+        {
+          "id": "customer-profile-intake-active",
+          "label": "Move to active",
+          "from": [
+            "validated"
+          ],
+          "to": "active"
+        },
+        {
+          "id": "customer-profile-intake-suppressed",
+          "label": "Move to suppressed",
+          "from": [
+            "active"
+          ],
+          "to": "suppressed"
+        }
+      ],
+      "seeds": [
+        {
+          "id": "customer-profile-intake-demo",
+          "state": "draft",
+          "customerReference": "CUS-DEMO-2048",
+          "segment": "Mid-market",
+          "lifecycleStage": "Active",
+          "accountOwner": "Demo Success Manager",
+          "contactConsent": "Needs verification"
+        }
+      ]
+    },
+    {
+      "id": "behavior-event-ingestion",
+      "title": "Behavior Event Ingestion",
+      "description": "Stage product and service behavior batches, review provenance and quality, and accept them for analysis.",
+      "fields": [
+        {
+          "key": "source",
+          "label": "Event source",
+          "type": "select",
+          "required": true,
+          "options": [
+            "Local fixture",
+            "CSV import",
+            "Sandbox connector"
+          ],
+          "default": "Local fixture"
+        },
+        {
+          "key": "eventTypes",
+          "label": "Event types",
+          "type": "textarea",
+          "required": true,
+          "default": "login; feature_used; support_ticket; invoice_paid"
+        },
+        {
+          "key": "customerCount",
+          "label": "Customer count",
+          "type": "number",
+          "required": true,
+          "default": 250
+        },
+        {
+          "key": "eventCount",
+          "label": "Event count",
+          "type": "number",
+          "required": true,
+          "default": 18420
+        },
+        {
+          "key": "qualityScore",
+          "label": "Quality score",
+          "type": "number",
+          "required": true,
+          "default": 96
+        }
+      ],
+      "states": [
+        "received",
+        "quality_review",
+        "accepted",
+        "rejected"
+      ],
+      "transitions": [
+        {
+          "id": "behavior-event-ingestion-quality_review",
+          "label": "Move to quality review",
+          "from": [
+            "received"
+          ],
+          "to": "quality_review"
+        },
+        {
+          "id": "behavior-event-ingestion-accepted",
+          "label": "Move to accepted",
+          "from": [
+            "quality_review"
+          ],
+          "to": "accepted"
+        },
+        {
+          "id": "behavior-event-ingestion-rejected",
+          "label": "Move to rejected",
+          "from": [
+            "accepted"
+          ],
+          "to": "rejected"
+        }
+      ],
+      "seeds": [
+        {
+          "id": "behavior-event-ingestion-demo",
+          "state": "received",
+          "source": "Local fixture",
+          "eventTypes": "login; feature_used; support_ticket; invoice_paid",
+          "customerCount": 250,
+          "eventCount": 18420,
+          "qualityScore": 96
+        }
+      ]
+    },
+    {
+      "id": "churn-risk-scoring",
+      "title": "Churn Risk Scoring",
+      "description": "Calculate an explainable churn score, review its drivers, and approve accounts for intervention.",
+      "fields": [
+        {
+          "key": "customerReference",
+          "label": "Customer reference",
+          "type": "text",
+          "required": true,
+          "default": "CUS-DEMO-2048"
+        },
+        {
+          "key": "riskScore",
+          "label": "Risk score",
+          "type": "number",
+          "required": true,
+          "default": 82
+        },
+        {
+          "key": "modelVersion",
+          "label": "Model version",
+          "type": "text",
+          "required": true,
+          "default": "local-baseline-v1"
+        },
+        {
+          "key": "topDrivers",
+          "label": "Top drivers",
+          "type": "textarea",
+          "required": true,
+          "default": "Usage down 38%; two unresolved tickets; renewal in 32 days"
+        },
+        {
+          "key": "confidence",
+          "label": "Confidence",
+          "type": "select",
+          "required": true,
+          "options": [
+            "Low",
+            "Medium",
+            "High"
+          ],
+          "default": "High"
+        }
+      ],
+      "states": [
+        "queued",
+        "scored",
+        "analyst_review",
+        "approved"
+      ],
+      "transitions": [
+        {
+          "id": "churn-risk-scoring-scored",
+          "label": "Move to scored",
+          "from": [
+            "queued"
+          ],
+          "to": "scored"
+        },
+        {
+          "id": "churn-risk-scoring-analyst_review",
+          "label": "Move to analyst review",
+          "from": [
+            "scored"
+          ],
+          "to": "analyst_review"
+        },
+        {
+          "id": "churn-risk-scoring-approved",
+          "label": "Move to approved",
+          "from": [
+            "analyst_review"
+          ],
+          "to": "approved"
+        }
+      ],
+      "seeds": [
+        {
+          "id": "churn-risk-scoring-demo",
+          "state": "queued",
+          "customerReference": "CUS-DEMO-2048",
+          "riskScore": 82,
+          "modelVersion": "local-baseline-v1",
+          "topDrivers": "Usage down 38%; two unresolved tickets; renewal in 32 days",
+          "confidence": "High"
+        }
+      ]
+    },
+    {
+      "id": "customer-lifetime-value",
+      "title": "Customer Lifetime Value",
+      "description": "Estimate historic and forward customer value, challenge assumptions, and publish an approved planning value.",
+      "fields": [
+        {
+          "key": "customerReference",
+          "label": "Customer reference",
+          "type": "text",
+          "required": true,
+          "default": "CUS-DEMO-2048"
+        },
+        {
+          "key": "annualRecurringRevenue",
+          "label": "Annual recurring revenue",
+          "type": "number",
+          "required": true,
+          "default": 48000
+        },
+        {
+          "key": "grossMarginPercent",
+          "label": "Gross margin percent",
+          "type": "number",
+          "required": true,
+          "default": 78
+        },
+        {
+          "key": "expectedRetentionMonths",
+          "label": "Expected retention months",
+          "type": "number",
+          "required": true,
+          "default": 20
+        },
+        {
+          "key": "estimatedClv",
+          "label": "Estimated CLV",
+          "type": "number",
+          "required": true,
+          "default": 62400
+        }
+      ],
+      "states": [
+        "estimated",
+        "reviewed",
+        "approved",
+        "published"
+      ],
+      "transitions": [
+        {
+          "id": "customer-lifetime-value-reviewed",
+          "label": "Move to reviewed",
+          "from": [
+            "estimated"
+          ],
+          "to": "reviewed"
+        },
+        {
+          "id": "customer-lifetime-value-approved",
+          "label": "Move to approved",
+          "from": [
+            "reviewed"
+          ],
+          "to": "approved"
+        },
+        {
+          "id": "customer-lifetime-value-published",
+          "label": "Move to published",
+          "from": [
+            "approved"
+          ],
+          "to": "published"
+        }
+      ],
+      "seeds": [
+        {
+          "id": "customer-lifetime-value-demo",
+          "state": "estimated",
+          "customerReference": "CUS-DEMO-2048",
+          "annualRecurringRevenue": 48000,
+          "grossMarginPercent": 78,
+          "expectedRetentionMonths": 20,
+          "estimatedClv": 62400
+        }
+      ]
+    },
+    {
+      "id": "retention-offer-review",
+      "title": "Retention Offer Review",
+      "description": "Design a policy-compliant retention offer and route pricing, margin, and eligibility decisions for approval.",
+      "fields": [
+        {
+          "key": "customerReference",
+          "label": "Customer reference",
+          "type": "text",
+          "required": true,
+          "default": "CUS-DEMO-2048"
+        },
+        {
+          "key": "offerType",
+          "label": "Offer type",
+          "type": "select",
+          "required": true,
+          "options": [
+            "Discount",
+            "Success package",
+            "Contract flexibility",
+            "Product training"
+          ],
+          "default": "Success package"
+        },
+        {
+          "key": "offerValue",
+          "label": "Offer value",
+          "type": "number",
+          "required": true,
+          "default": 3500
+        },
+        {
+          "key": "marginImpactPercent",
+          "label": "Margin impact percent",
+          "type": "number",
+          "required": true,
+          "default": 3.2
+        },
+        {
+          "key": "rationale",
+          "label": "Rationale",
+          "type": "textarea",
+          "required": true,
+          "default": "Address adoption gap before renewal without changing list price."
+        }
+      ],
+      "states": [
+        "proposed",
+        "eligibility_review",
+        "approved",
+        "declined"
+      ],
+      "transitions": [
+        {
+          "id": "retention-offer-review-eligibility_review",
+          "label": "Move to eligibility review",
+          "from": [
+            "proposed"
+          ],
+          "to": "eligibility_review"
+        },
+        {
+          "id": "retention-offer-review-approved",
+          "label": "Move to approved",
+          "from": [
+            "eligibility_review"
+          ],
+          "to": "approved"
+        },
+        {
+          "id": "retention-offer-review-declined",
+          "label": "Move to declined",
+          "from": [
+            "approved"
+          ],
+          "to": "declined"
+        }
+      ],
+      "seeds": [
+        {
+          "id": "retention-offer-review-demo",
+          "state": "proposed",
+          "customerReference": "CUS-DEMO-2048",
+          "offerType": "Success package",
+          "offerValue": 3500,
+          "marginImpactPercent": 3.2,
+          "rationale": "Address adoption gap before renewal without changing list price."
+        }
+      ]
+    },
+    {
+      "id": "intervention-orchestration",
+      "title": "Intervention Orchestration",
+      "description": "Assign a human-reviewed retention play, track consent and outreach status, and record the observed outcome.",
+      "fields": [
+        {
+          "key": "customerReference",
+          "label": "Customer reference",
+          "type": "text",
+          "required": true,
+          "default": "CUS-DEMO-2048"
+        },
+        {
+          "key": "playbook",
+          "label": "Playbook",
+          "type": "select",
+          "required": true,
+          "options": [
+            "Executive success review",
+            "Adoption workshop",
+            "Support recovery",
+            "Renewal consultation"
+          ],
+          "default": "Executive success review"
+        },
+        {
+          "key": "owner",
+          "label": "Intervention owner",
+          "type": "text",
+          "required": true,
+          "default": "Demo Success Manager"
+        },
+        {
+          "key": "channel",
+          "label": "Channel",
+          "type": "select",
+          "required": true,
+          "options": [
+            "Email",
+            "Phone",
+            "In-app",
+            "Meeting"
+          ],
+          "default": "Email"
+        },
+        {
+          "key": "outreachStatus",
+          "label": "Outreach status",
+          "type": "select",
+          "required": true,
+          "options": [
+            "Not sent",
+            "Ready for human send",
+            "Sent manually",
+            "Blocked"
+          ],
+          "default": "Not sent"
+        }
+      ],
+      "states": [
+        "planned",
+        "owner_review",
+        "authorized",
+        "completed"
+      ],
+      "transitions": [
+        {
+          "id": "intervention-orchestration-owner_review",
+          "label": "Move to owner review",
+          "from": [
+            "planned"
+          ],
+          "to": "owner_review"
+        },
+        {
+          "id": "intervention-orchestration-authorized",
+          "label": "Move to authorized",
+          "from": [
+            "owner_review"
+          ],
+          "to": "authorized"
+        },
+        {
+          "id": "intervention-orchestration-completed",
+          "label": "Move to completed",
+          "from": [
+            "authorized"
+          ],
+          "to": "completed"
+        }
+      ],
+      "seeds": [
+        {
+          "id": "intervention-orchestration-demo",
+          "state": "planned",
+          "customerReference": "CUS-DEMO-2048",
+          "playbook": "Executive success review",
+          "owner": "Demo Success Manager",
+          "channel": "Email",
+          "outreachStatus": "Not sent"
+        }
+      ]
+    },
+    {
+      "id": "cohort-outcome-monitoring",
+      "title": "Cohort Outcome Monitoring",
+      "description": "Compare treated and untreated cohorts, review retention lift, and publish a measured outcome report.",
+      "fields": [
+        {
+          "key": "cohortName",
+          "label": "Cohort name",
+          "type": "text",
+          "required": true,
+          "default": "2026-Q3 high-risk accounts"
+        },
+        {
+          "key": "observationWindowDays",
+          "label": "Observation window days",
+          "type": "number",
+          "required": true,
+          "default": 90
+        },
+        {
+          "key": "treatedCustomers",
+          "label": "Treated customers",
+          "type": "number",
+          "required": true,
+          "default": 80
+        },
+        {
+          "key": "retainedCustomers",
+          "label": "Retained customers",
+          "type": "number",
+          "required": true,
+          "default": 61
+        },
+        {
+          "key": "estimatedLiftPercent",
+          "label": "Estimated retention lift percent",
+          "type": "number",
+          "required": true,
+          "default": 8.4
+        }
+      ],
+      "states": [
+        "collecting",
+        "analyzing",
+        "reviewed",
+        "published"
+      ],
+      "transitions": [
+        {
+          "id": "cohort-outcome-monitoring-analyzing",
+          "label": "Move to analyzing",
+          "from": [
+            "collecting"
+          ],
+          "to": "analyzing"
+        },
+        {
+          "id": "cohort-outcome-monitoring-reviewed",
+          "label": "Move to reviewed",
+          "from": [
+            "analyzing"
+          ],
+          "to": "reviewed"
+        },
+        {
+          "id": "cohort-outcome-monitoring-published",
+          "label": "Move to published",
+          "from": [
+            "reviewed"
+          ],
+          "to": "published"
+        }
+      ],
+      "seeds": [
+        {
+          "id": "cohort-outcome-monitoring-demo",
+          "state": "collecting",
+          "cohortName": "2026-Q3 high-risk accounts",
+          "observationWindowDays": 90,
+          "treatedCustomers": 80,
+          "retainedCustomers": 61,
+          "estimatedLiftPercent": 8.4
+        }
+      ]
+    },
+    {
+      "id": "crm-integration-readiness",
+      "title": "CRM Integration Readiness",
+      "description": "Map customer, risk, task, and outcome fields and verify a CRM adapter with local or sandbox records.",
+      "fields": [
+        {
+          "key": "provider",
+          "label": "CRM provider or adapter",
+          "type": "text",
+          "required": true,
+          "default": "Local CRM fixture"
+        },
+        {
+          "key": "environment",
+          "label": "Environment",
+          "type": "select",
+          "required": true,
+          "options": [
+            "Local fixture",
+            "Sandbox configuration",
+            "Production configuration"
+          ],
+          "default": "Local fixture"
+        },
+        {
+          "key": "objects",
+          "label": "Mapped objects",
+          "type": "textarea",
+          "required": true,
+          "default": "Account; Contact; Renewal; Retention Task"
+        },
+        {
+          "key": "credentialStatus",
+          "label": "Credential status",
+          "type": "select",
+          "required": true,
+          "options": [
+            "Not required for fixture",
+            "Missing",
+            "Stored externally"
+          ],
+          "default": "Not required for fixture"
+        },
+        {
+          "key": "testResult",
+          "label": "Test result",
+          "type": "select",
+          "required": true,
+          "options": [
+            "Not run",
+            "Passed with fixture",
+            "Failed",
+            "Blocked"
+          ],
+          "default": "Not run"
+        }
+      ],
+      "states": [
+        "inventoried",
+        "mapped",
+        "test_ready",
+        "verified"
+      ],
+      "transitions": [
+        {
+          "id": "crm-integration-readiness-mapped",
+          "label": "Move to mapped",
+          "from": [
+            "inventoried"
+          ],
+          "to": "mapped"
+        },
+        {
+          "id": "crm-integration-readiness-test_ready",
+          "label": "Move to test ready",
+          "from": [
+            "mapped"
+          ],
+          "to": "test_ready"
+        },
+        {
+          "id": "crm-integration-readiness-verified",
+          "label": "Move to verified",
+          "from": [
+            "test_ready"
+          ],
+          "to": "verified"
+        }
+      ],
+      "seeds": [
+        {
+          "id": "crm-integration-readiness-demo",
+          "state": "inventoried",
+          "provider": "Local CRM fixture",
+          "environment": "Local fixture",
+          "objects": "Account; Contact; Renewal; Retention Task",
+          "credentialStatus": "Not required for fixture",
+          "testResult": "Not run"
+        }
+      ]
+    }
+  ]
+}
