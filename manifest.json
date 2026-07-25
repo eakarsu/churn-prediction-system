@@ -11,12 +11,12 @@
     "leads",
     "referral"
   ],
-  "featureCount": 256,
-  "candidateFeatureCount": 355,
-  "eliminatedSimilarFeatures": 99,
-  "evidenceCount": 815,
-  "aiPageCount": 0,
-  "sourceAIPageCount": 0,
+  "featureCount": 258,
+  "candidateFeatureCount": 356,
+  "eliminatedSimilarFeatures": 98,
+  "evidenceCount": 819,
+  "aiPageCount": 3,
+  "sourceAIPageCount": 3,
   "featureEvidencePolicy": "Existing source routes, pages, APIs, models, schemas, and navigation only",
   "optimizationPolicy": "Equivalent feature names are consolidated once per industry and assigned to one canonical app owner",
   "database": "database.sqlite",
@@ -25,6 +25,6 @@
     "seededTables": 0,
     "seededRows": 0
   },
-  "visibleFeatureCount": 125,
-  "featureVisibilityMode": "source-backed-fallback"
+  "visibleFeatureCount": 3,
+  "featureVisibilityMode": "seeded-or-ai"
 }

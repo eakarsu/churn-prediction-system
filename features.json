@@ -5092,6 +5092,41 @@
     ]
   },
   {
+    "name": "Generate Report",
+    "canonicalKey": "generate report",
+    "aliases": [],
+    "kinds": [
+      "ai-page",
+      "api"
+    ],
+    "routes": [
+      "/ai-reports?tool=generate-report",
+      "/api/ai/generate-report"
+    ],
+    "sourceProjects": [
+      "AIChurnPredictionSystem"
+    ],
+    "consolidatedFromApps": [
+      "sales-marketing-crm/churn-prediction-system"
+    ],
+    "evidence": [
+      {
+        "kind": "ai-page",
+        "sourceProject": "AIChurnPredictionSystem",
+        "path": "frontend/src/components/AIReports.js:1",
+        "route": "/ai-reports?tool=generate-report",
+        "originApp": "sales-marketing-crm/churn-prediction-system"
+      },
+      {
+        "kind": "api",
+        "sourceProject": "AIChurnPredictionSystem",
+        "path": "backend/server.js:2028",
+        "route": "/api/ai/generate-report",
+        "originApp": "sales-marketing-crm/churn-prediction-system"
+      }
+    ]
+  },
+  {
     "name": "Generate Winback",
     "canonicalKey": "generate winback",
     "aliases": [],
@@ -6506,9 +6541,11 @@
     "canonicalKey": "impact predict revenue",
     "aliases": [],
     "kinds": [
+      "ai-page",
       "api"
     ],
     "routes": [
+      "/ai-reports?tool=predict-revenue-impact",
       "/api/ai/predict-revenue-impact"
     ],
     "sourceProjects": [
@@ -6518,6 +6555,13 @@
       "sales-marketing-crm/churn-prediction-system"
     ],
     "evidence": [
+      {
+        "kind": "ai-page",
+        "sourceProject": "AIChurnPredictionSystem",
+        "path": "frontend/src/components/AIReports.js:1",
+        "route": "/ai-reports?tool=predict-revenue-impact",
+        "originApp": "sales-marketing-crm/churn-prediction-system"
+      },
       {
         "kind": "api",
         "sourceProject": "AIChurnPredictionSystem",
@@ -10580,6 +10624,32 @@
         "sourceProject": "leads",
         "path": "app/web-forms/page.tsx",
         "route": "/web-forms",
+        "originApp": "sales-marketing-crm/churn-prediction-system"
+      }
+    ]
+  },
+  {
+    "name": "Win Back Orchestration",
+    "canonicalKey": "back orchestration win",
+    "aliases": [],
+    "kinds": [
+      "ai-page"
+    ],
+    "routes": [
+      "/winback-orchestration"
+    ],
+    "sourceProjects": [
+      "AIChurnPredictionSystem"
+    ],
+    "consolidatedFromApps": [
+      "sales-marketing-crm/churn-prediction-system"
+    ],
+    "evidence": [
+      {
+        "kind": "ai-page",
+        "sourceProject": "AIChurnPredictionSystem",
+        "path": "frontend/src/components/WinbackOrchestration.js:1",
+        "route": "/winback-orchestration",
         "originApp": "sales-marketing-crm/churn-prediction-system"
       }
     ]
