@@ -3,752 +3,1949 @@
   "appId": "churn-prediction-system",
   "workflows": [
     {
-      "id": "customer-profile-intake",
-      "title": "Customer Profile Intake",
-      "description": "Create a consent-aware customer profile with lifecycle, segment, ownership, and value inputs.",
+      "id": "request-intake",
+      "title": "Ab Test Orchestrator Request Intake",
+      "description": "Manage request intake for Ab Test Orchestrator within Churn Prediction System, with explicit ownership, due dates, state transitions, and audit history.",
       "fields": [
         {
-          "key": "customerReference",
-          "label": "Customer reference",
+          "key": "reference",
+          "label": "Reference",
           "type": "text",
-          "required": true,
-          "default": "CUS-DEMO-2048"
+          "required": true
         },
         {
-          "key": "segment",
-          "label": "Segment",
-          "type": "select",
-          "required": true,
-          "options": [
-            "Consumer",
-            "SMB",
-            "Mid-market",
-            "Enterprise"
-          ],
-          "default": "Mid-market"
-        },
-        {
-          "key": "lifecycleStage",
-          "label": "Lifecycle stage",
-          "type": "select",
-          "required": true,
-          "options": [
-            "Trial",
-            "New",
-            "Active",
-            "At risk",
-            "Churned"
-          ],
-          "default": "Active"
-        },
-        {
-          "key": "accountOwner",
-          "label": "Account owner",
+          "key": "subject",
+          "label": "Ab Test Orchestrator Subject",
           "type": "text",
-          "required": true,
-          "default": "Demo Success Manager"
+          "required": true
         },
         {
-          "key": "contactConsent",
-          "label": "Contact consent",
+          "key": "owner",
+          "label": "Owner",
+          "type": "text",
+          "required": true
+        },
+        {
+          "key": "priority",
+          "label": "Priority",
           "type": "select",
           "required": true,
           "options": [
-            "Needs verification",
-            "Granted",
-            "Declined"
-          ],
-          "default": "Needs verification"
+            "Low",
+            "Medium",
+            "High",
+            "Critical"
+          ]
+        },
+        {
+          "key": "dueDate",
+          "label": "Due Date",
+          "type": "date",
+          "required": true
+        },
+        {
+          "key": "notes",
+          "label": "Operational Notes",
+          "type": "textarea",
+          "required": true
         }
       ],
       "states": [
         "draft",
-        "validated",
-        "active",
-        "suppressed"
-      ],
-      "transitions": [
-        {
-          "id": "customer-profile-intake-validated",
-          "label": "Move to validated",
-          "from": [
-            "draft"
-          ],
-          "to": "validated"
-        },
-        {
-          "id": "customer-profile-intake-active",
-          "label": "Move to active",
-          "from": [
-            "validated"
-          ],
-          "to": "active"
-        },
-        {
-          "id": "customer-profile-intake-suppressed",
-          "label": "Move to suppressed",
-          "from": [
-            "active"
-          ],
-          "to": "suppressed"
-        }
-      ],
-      "seeds": [
-        {
-          "id": "customer-profile-intake-demo",
-          "state": "draft",
-          "customerReference": "CUS-DEMO-2048",
-          "segment": "Mid-market",
-          "lifecycleStage": "Active",
-          "accountOwner": "Demo Success Manager",
-          "contactConsent": "Needs verification"
-        }
-      ]
-    },
-    {
-      "id": "behavior-event-ingestion",
-      "title": "Behavior Event Ingestion",
-      "description": "Stage product and service behavior batches, review provenance and quality, and accept them for analysis.",
-      "fields": [
-        {
-          "key": "source",
-          "label": "Event source",
-          "type": "select",
-          "required": true,
-          "options": [
-            "Local fixture",
-            "CSV import",
-            "Sandbox connector"
-          ],
-          "default": "Local fixture"
-        },
-        {
-          "key": "eventTypes",
-          "label": "Event types",
-          "type": "textarea",
-          "required": true,
-          "default": "login; feature_used; support_ticket; invoice_paid"
-        },
-        {
-          "key": "customerCount",
-          "label": "Customer count",
-          "type": "number",
-          "required": true,
-          "default": 250
-        },
-        {
-          "key": "eventCount",
-          "label": "Event count",
-          "type": "number",
-          "required": true,
-          "default": 18420
-        },
-        {
-          "key": "qualityScore",
-          "label": "Quality score",
-          "type": "number",
-          "required": true,
-          "default": 96
-        }
-      ],
-      "states": [
-        "received",
-        "quality_review",
+        "submitted",
+        "triage",
         "accepted",
         "rejected"
       ],
       "transitions": [
         {
-          "id": "behavior-event-ingestion-quality_review",
-          "label": "Move to quality review",
+          "id": "submit",
+          "label": "Submit Request",
           "from": [
-            "received"
+            "draft"
           ],
-          "to": "quality_review"
+          "to": "submitted"
         },
         {
-          "id": "behavior-event-ingestion-accepted",
-          "label": "Move to accepted",
+          "id": "triage",
+          "label": "Start Triage",
           "from": [
-            "quality_review"
+            "submitted"
+          ],
+          "to": "triage"
+        },
+        {
+          "id": "accept",
+          "label": "Accept Request",
+          "from": [
+            "triage"
           ],
           "to": "accepted"
         },
         {
-          "id": "behavior-event-ingestion-rejected",
-          "label": "Move to rejected",
+          "id": "reject",
+          "label": "Reject Request",
           "from": [
-            "accepted"
+            "submitted",
+            "triage"
           ],
           "to": "rejected"
         }
       ],
       "seeds": [
         {
-          "id": "behavior-event-ingestion-demo",
-          "state": "received",
-          "source": "Local fixture",
-          "eventTypes": "login; feature_used; support_ticket; invoice_paid",
-          "customerCount": 250,
-          "eventCount": 18420,
-          "qualityScore": 96
+          "id": "request-intake-001",
+          "state": "draft",
+          "reference": "CHUPRESYS-0001",
+          "subject": "Ab Test Orchestrator — North Region",
+          "owner": "Avery Morgan",
+          "priority": "Low",
+          "dueDate": "2026-08-01",
+          "notes": "Demo request intake record for north region; verify evidence and next action before completion."
+        },
+        {
+          "id": "request-intake-002",
+          "state": "draft",
+          "reference": "CHUPRESYS-0002",
+          "subject": "Ab Test Orchestrator — Enterprise Account",
+          "owner": "Jordan Lee",
+          "priority": "Medium",
+          "dueDate": "2026-08-03",
+          "notes": "Demo request intake record for enterprise account; verify evidence and next action before completion."
+        },
+        {
+          "id": "request-intake-003",
+          "state": "draft",
+          "reference": "CHUPRESYS-0003",
+          "subject": "Ab Test Orchestrator — Quarterly Cycle",
+          "owner": "Taylor Brooks",
+          "priority": "High",
+          "dueDate": "2026-08-05",
+          "notes": "Demo request intake record for quarterly cycle; verify evidence and next action before completion."
+        },
+        {
+          "id": "request-intake-004",
+          "state": "draft",
+          "reference": "CHUPRESYS-0004",
+          "subject": "Ab Test Orchestrator — Priority Queue",
+          "owner": "Morgan Chen",
+          "priority": "Critical",
+          "dueDate": "2026-08-07",
+          "notes": "Demo request intake record for priority queue; verify evidence and next action before completion."
+        },
+        {
+          "id": "request-intake-005",
+          "state": "draft",
+          "reference": "CHUPRESYS-0005",
+          "subject": "Ab Test Orchestrator — Operations Review",
+          "owner": "Riley Patel",
+          "priority": "Low",
+          "dueDate": "2026-08-09",
+          "notes": "Demo request intake record for operations review; verify evidence and next action before completion."
+        },
+        {
+          "id": "request-intake-006",
+          "state": "draft",
+          "reference": "CHUPRESYS-0006",
+          "subject": "Ab Test Orchestrator — Customer Request",
+          "owner": "Casey Nguyen",
+          "priority": "Medium",
+          "dueDate": "2026-08-11",
+          "notes": "Demo request intake record for customer request; verify evidence and next action before completion."
+        },
+        {
+          "id": "request-intake-007",
+          "state": "draft",
+          "reference": "CHUPRESYS-0007",
+          "subject": "Ab Test Orchestrator — Compliance Check",
+          "owner": "Cameron Diaz",
+          "priority": "High",
+          "dueDate": "2026-08-13",
+          "notes": "Demo request intake record for compliance check; verify evidence and next action before completion."
+        },
+        {
+          "id": "request-intake-008",
+          "state": "draft",
+          "reference": "CHUPRESYS-0008",
+          "subject": "Ab Test Orchestrator — Service Window",
+          "owner": "Drew Wilson",
+          "priority": "Critical",
+          "dueDate": "2026-08-15",
+          "notes": "Demo request intake record for service window; verify evidence and next action before completion."
+        },
+        {
+          "id": "request-intake-009",
+          "state": "draft",
+          "reference": "CHUPRESYS-0009",
+          "subject": "Ab Test Orchestrator — Quality Sample",
+          "owner": "Emerson Clark",
+          "priority": "Low",
+          "dueDate": "2026-08-17",
+          "notes": "Demo request intake record for quality sample; verify evidence and next action before completion."
+        },
+        {
+          "id": "request-intake-010",
+          "state": "draft",
+          "reference": "CHUPRESYS-0010",
+          "subject": "Ab Test Orchestrator — Management Review",
+          "owner": "Hayden Kim",
+          "priority": "Medium",
+          "dueDate": "2026-08-19",
+          "notes": "Demo request intake record for management review; verify evidence and next action before completion."
+        },
+        {
+          "id": "request-intake-011",
+          "state": "draft",
+          "reference": "CHUPRESYS-0011",
+          "subject": "Ab Test Orchestrator — Exception Follow-up",
+          "owner": "Jamie Rivera",
+          "priority": "High",
+          "dueDate": "2026-08-21",
+          "notes": "Demo request intake record for exception follow-up; verify evidence and next action before completion."
+        },
+        {
+          "id": "request-intake-012",
+          "state": "draft",
+          "reference": "CHUPRESYS-0012",
+          "subject": "Ab Test Orchestrator — Evidence Package",
+          "owner": "Kai Thompson",
+          "priority": "Critical",
+          "dueDate": "2026-08-23",
+          "notes": "Demo request intake record for evidence package; verify evidence and next action before completion."
+        },
+        {
+          "id": "request-intake-013",
+          "state": "draft",
+          "reference": "CHUPRESYS-0013",
+          "subject": "Ab Test Orchestrator — Planning Cycle",
+          "owner": "Logan Shah",
+          "priority": "Low",
+          "dueDate": "2026-08-25",
+          "notes": "Demo request intake record for planning cycle; verify evidence and next action before completion."
+        },
+        {
+          "id": "request-intake-014",
+          "state": "draft",
+          "reference": "CHUPRESYS-0014",
+          "subject": "Ab Test Orchestrator — Performance Review",
+          "owner": "Parker Evans",
+          "priority": "Medium",
+          "dueDate": "2026-08-27",
+          "notes": "Demo request intake record for performance review; verify evidence and next action before completion."
+        },
+        {
+          "id": "request-intake-015",
+          "state": "draft",
+          "reference": "CHUPRESYS-0015",
+          "subject": "Ab Test Orchestrator — Final Verification",
+          "owner": "Quinn Murphy",
+          "priority": "High",
+          "dueDate": "2026-08-29",
+          "notes": "Demo request intake record for final verification; verify evidence and next action before completion."
         }
       ]
     },
     {
-      "id": "churn-risk-scoring",
-      "title": "Churn Risk Scoring",
-      "description": "Calculate an explainable churn score, review its drivers, and approve accounts for intervention.",
+      "id": "operations-queue",
+      "title": "Accept Operations Queue",
+      "description": "Manage operations queue for Accept within Churn Prediction System, with explicit ownership, due dates, state transitions, and audit history.",
       "fields": [
         {
-          "key": "customerReference",
-          "label": "Customer reference",
+          "key": "reference",
+          "label": "Reference",
           "type": "text",
-          "required": true,
-          "default": "CUS-DEMO-2048"
+          "required": true
         },
         {
-          "key": "riskScore",
-          "label": "Risk score",
-          "type": "number",
-          "required": true,
-          "default": 82
-        },
-        {
-          "key": "modelVersion",
-          "label": "Model version",
+          "key": "subject",
+          "label": "Accept Subject",
           "type": "text",
-          "required": true,
-          "default": "local-baseline-v1"
+          "required": true
         },
         {
-          "key": "topDrivers",
-          "label": "Top drivers",
-          "type": "textarea",
-          "required": true,
-          "default": "Usage down 38%; two unresolved tickets; renewal in 32 days"
+          "key": "owner",
+          "label": "Owner",
+          "type": "text",
+          "required": true
         },
         {
-          "key": "confidence",
-          "label": "Confidence",
+          "key": "priority",
+          "label": "Priority",
           "type": "select",
           "required": true,
           "options": [
             "Low",
             "Medium",
-            "High"
-          ],
-          "default": "High"
+            "High",
+            "Critical"
+          ]
+        },
+        {
+          "key": "dueDate",
+          "label": "Due Date",
+          "type": "date",
+          "required": true
+        },
+        {
+          "key": "notes",
+          "label": "Operational Notes",
+          "type": "textarea",
+          "required": true
         }
       ],
       "states": [
         "queued",
-        "scored",
-        "analyst_review",
-        "approved"
+        "assigned",
+        "in-progress",
+        "blocked",
+        "complete"
       ],
       "transitions": [
         {
-          "id": "churn-risk-scoring-scored",
-          "label": "Move to scored",
+          "id": "assign",
+          "label": "Assign Work",
           "from": [
             "queued"
           ],
-          "to": "scored"
+          "to": "assigned"
         },
         {
-          "id": "churn-risk-scoring-analyst_review",
-          "label": "Move to analyst review",
+          "id": "start",
+          "label": "Start Work",
           "from": [
-            "scored"
+            "assigned"
           ],
-          "to": "analyst_review"
+          "to": "in-progress"
         },
         {
-          "id": "churn-risk-scoring-approved",
-          "label": "Move to approved",
+          "id": "block",
+          "label": "Record Blocker",
           "from": [
-            "analyst_review"
+            "assigned",
+            "in-progress"
           ],
-          "to": "approved"
+          "to": "blocked"
+        },
+        {
+          "id": "complete",
+          "label": "Complete Work",
+          "from": [
+            "in-progress",
+            "blocked"
+          ],
+          "to": "complete"
         }
       ],
       "seeds": [
         {
-          "id": "churn-risk-scoring-demo",
+          "id": "operations-queue-001",
           "state": "queued",
-          "customerReference": "CUS-DEMO-2048",
-          "riskScore": 82,
-          "modelVersion": "local-baseline-v1",
-          "topDrivers": "Usage down 38%; two unresolved tickets; renewal in 32 days",
-          "confidence": "High"
+          "reference": "CHUPRESYS-0001",
+          "subject": "Accept — North Region",
+          "owner": "Avery Morgan",
+          "priority": "Low",
+          "dueDate": "2026-08-01",
+          "notes": "Demo operations queue record for north region; verify evidence and next action before completion."
+        },
+        {
+          "id": "operations-queue-002",
+          "state": "queued",
+          "reference": "CHUPRESYS-0002",
+          "subject": "Accept — Enterprise Account",
+          "owner": "Jordan Lee",
+          "priority": "Medium",
+          "dueDate": "2026-08-03",
+          "notes": "Demo operations queue record for enterprise account; verify evidence and next action before completion."
+        },
+        {
+          "id": "operations-queue-003",
+          "state": "queued",
+          "reference": "CHUPRESYS-0003",
+          "subject": "Accept — Quarterly Cycle",
+          "owner": "Taylor Brooks",
+          "priority": "High",
+          "dueDate": "2026-08-05",
+          "notes": "Demo operations queue record for quarterly cycle; verify evidence and next action before completion."
+        },
+        {
+          "id": "operations-queue-004",
+          "state": "queued",
+          "reference": "CHUPRESYS-0004",
+          "subject": "Accept — Priority Queue",
+          "owner": "Morgan Chen",
+          "priority": "Critical",
+          "dueDate": "2026-08-07",
+          "notes": "Demo operations queue record for priority queue; verify evidence and next action before completion."
+        },
+        {
+          "id": "operations-queue-005",
+          "state": "queued",
+          "reference": "CHUPRESYS-0005",
+          "subject": "Accept — Operations Review",
+          "owner": "Riley Patel",
+          "priority": "Low",
+          "dueDate": "2026-08-09",
+          "notes": "Demo operations queue record for operations review; verify evidence and next action before completion."
+        },
+        {
+          "id": "operations-queue-006",
+          "state": "queued",
+          "reference": "CHUPRESYS-0006",
+          "subject": "Accept — Customer Request",
+          "owner": "Casey Nguyen",
+          "priority": "Medium",
+          "dueDate": "2026-08-11",
+          "notes": "Demo operations queue record for customer request; verify evidence and next action before completion."
+        },
+        {
+          "id": "operations-queue-007",
+          "state": "queued",
+          "reference": "CHUPRESYS-0007",
+          "subject": "Accept — Compliance Check",
+          "owner": "Cameron Diaz",
+          "priority": "High",
+          "dueDate": "2026-08-13",
+          "notes": "Demo operations queue record for compliance check; verify evidence and next action before completion."
+        },
+        {
+          "id": "operations-queue-008",
+          "state": "queued",
+          "reference": "CHUPRESYS-0008",
+          "subject": "Accept — Service Window",
+          "owner": "Drew Wilson",
+          "priority": "Critical",
+          "dueDate": "2026-08-15",
+          "notes": "Demo operations queue record for service window; verify evidence and next action before completion."
+        },
+        {
+          "id": "operations-queue-009",
+          "state": "queued",
+          "reference": "CHUPRESYS-0009",
+          "subject": "Accept — Quality Sample",
+          "owner": "Emerson Clark",
+          "priority": "Low",
+          "dueDate": "2026-08-17",
+          "notes": "Demo operations queue record for quality sample; verify evidence and next action before completion."
+        },
+        {
+          "id": "operations-queue-010",
+          "state": "queued",
+          "reference": "CHUPRESYS-0010",
+          "subject": "Accept — Management Review",
+          "owner": "Hayden Kim",
+          "priority": "Medium",
+          "dueDate": "2026-08-19",
+          "notes": "Demo operations queue record for management review; verify evidence and next action before completion."
+        },
+        {
+          "id": "operations-queue-011",
+          "state": "queued",
+          "reference": "CHUPRESYS-0011",
+          "subject": "Accept — Exception Follow-up",
+          "owner": "Jamie Rivera",
+          "priority": "High",
+          "dueDate": "2026-08-21",
+          "notes": "Demo operations queue record for exception follow-up; verify evidence and next action before completion."
+        },
+        {
+          "id": "operations-queue-012",
+          "state": "queued",
+          "reference": "CHUPRESYS-0012",
+          "subject": "Accept — Evidence Package",
+          "owner": "Kai Thompson",
+          "priority": "Critical",
+          "dueDate": "2026-08-23",
+          "notes": "Demo operations queue record for evidence package; verify evidence and next action before completion."
+        },
+        {
+          "id": "operations-queue-013",
+          "state": "queued",
+          "reference": "CHUPRESYS-0013",
+          "subject": "Accept — Planning Cycle",
+          "owner": "Logan Shah",
+          "priority": "Low",
+          "dueDate": "2026-08-25",
+          "notes": "Demo operations queue record for planning cycle; verify evidence and next action before completion."
+        },
+        {
+          "id": "operations-queue-014",
+          "state": "queued",
+          "reference": "CHUPRESYS-0014",
+          "subject": "Accept — Performance Review",
+          "owner": "Parker Evans",
+          "priority": "Medium",
+          "dueDate": "2026-08-27",
+          "notes": "Demo operations queue record for performance review; verify evidence and next action before completion."
+        },
+        {
+          "id": "operations-queue-015",
+          "state": "queued",
+          "reference": "CHUPRESYS-0015",
+          "subject": "Accept — Final Verification",
+          "owner": "Quinn Murphy",
+          "priority": "High",
+          "dueDate": "2026-08-29",
+          "notes": "Demo operations queue record for final verification; verify evidence and next action before completion."
         }
       ]
     },
     {
-      "id": "customer-lifetime-value",
-      "title": "Customer Lifetime Value",
-      "description": "Estimate historic and forward customer value, challenge assumptions, and publish an approved planning value.",
+      "id": "quality-review",
+      "title": "Activate Quality Review",
+      "description": "Manage quality review for Activate within Churn Prediction System, with explicit ownership, due dates, state transitions, and audit history.",
       "fields": [
         {
-          "key": "customerReference",
-          "label": "Customer reference",
+          "key": "reference",
+          "label": "Reference",
           "type": "text",
-          "required": true,
-          "default": "CUS-DEMO-2048"
+          "required": true
         },
         {
-          "key": "annualRecurringRevenue",
-          "label": "Annual recurring revenue",
-          "type": "number",
-          "required": true,
-          "default": 48000
-        },
-        {
-          "key": "grossMarginPercent",
-          "label": "Gross margin percent",
-          "type": "number",
-          "required": true,
-          "default": 78
-        },
-        {
-          "key": "expectedRetentionMonths",
-          "label": "Expected retention months",
-          "type": "number",
-          "required": true,
-          "default": 20
-        },
-        {
-          "key": "estimatedClv",
-          "label": "Estimated CLV",
-          "type": "number",
-          "required": true,
-          "default": 62400
-        }
-      ],
-      "states": [
-        "estimated",
-        "reviewed",
-        "approved",
-        "published"
-      ],
-      "transitions": [
-        {
-          "id": "customer-lifetime-value-reviewed",
-          "label": "Move to reviewed",
-          "from": [
-            "estimated"
-          ],
-          "to": "reviewed"
-        },
-        {
-          "id": "customer-lifetime-value-approved",
-          "label": "Move to approved",
-          "from": [
-            "reviewed"
-          ],
-          "to": "approved"
-        },
-        {
-          "id": "customer-lifetime-value-published",
-          "label": "Move to published",
-          "from": [
-            "approved"
-          ],
-          "to": "published"
-        }
-      ],
-      "seeds": [
-        {
-          "id": "customer-lifetime-value-demo",
-          "state": "estimated",
-          "customerReference": "CUS-DEMO-2048",
-          "annualRecurringRevenue": 48000,
-          "grossMarginPercent": 78,
-          "expectedRetentionMonths": 20,
-          "estimatedClv": 62400
-        }
-      ]
-    },
-    {
-      "id": "retention-offer-review",
-      "title": "Retention Offer Review",
-      "description": "Design a policy-compliant retention offer and route pricing, margin, and eligibility decisions for approval.",
-      "fields": [
-        {
-          "key": "customerReference",
-          "label": "Customer reference",
+          "key": "subject",
+          "label": "Activate Subject",
           "type": "text",
-          "required": true,
-          "default": "CUS-DEMO-2048"
+          "required": true
         },
         {
-          "key": "offerType",
-          "label": "Offer type",
+          "key": "owner",
+          "label": "Owner",
+          "type": "text",
+          "required": true
+        },
+        {
+          "key": "priority",
+          "label": "Priority",
           "type": "select",
           "required": true,
           "options": [
-            "Discount",
-            "Success package",
-            "Contract flexibility",
-            "Product training"
-          ],
-          "default": "Success package"
+            "Low",
+            "Medium",
+            "High",
+            "Critical"
+          ]
         },
         {
-          "key": "offerValue",
-          "label": "Offer value",
-          "type": "number",
-          "required": true,
-          "default": 3500
+          "key": "dueDate",
+          "label": "Due Date",
+          "type": "date",
+          "required": true
         },
         {
-          "key": "marginImpactPercent",
-          "label": "Margin impact percent",
-          "type": "number",
-          "required": true,
-          "default": 3.2
-        },
-        {
-          "key": "rationale",
-          "label": "Rationale",
+          "key": "notes",
+          "label": "Operational Notes",
           "type": "textarea",
-          "required": true,
-          "default": "Address adoption gap before renewal without changing list price."
+          "required": true
         }
       ],
       "states": [
-        "proposed",
-        "eligibility_review",
+        "pending",
+        "reviewing",
+        "changes-required",
+        "verified",
+        "closed"
+      ],
+      "transitions": [
+        {
+          "id": "review",
+          "label": "Begin Review",
+          "from": [
+            "pending"
+          ],
+          "to": "reviewing"
+        },
+        {
+          "id": "request-changes",
+          "label": "Request Changes",
+          "from": [
+            "reviewing"
+          ],
+          "to": "changes-required"
+        },
+        {
+          "id": "verify",
+          "label": "Verify Result",
+          "from": [
+            "reviewing",
+            "changes-required"
+          ],
+          "to": "verified"
+        },
+        {
+          "id": "close",
+          "label": "Close Review",
+          "from": [
+            "verified"
+          ],
+          "to": "closed"
+        }
+      ],
+      "seeds": [
+        {
+          "id": "quality-review-001",
+          "state": "pending",
+          "reference": "CHUPRESYS-0001",
+          "subject": "Activate — North Region",
+          "owner": "Avery Morgan",
+          "priority": "Low",
+          "dueDate": "2026-08-01",
+          "notes": "Demo quality review record for north region; verify evidence and next action before completion."
+        },
+        {
+          "id": "quality-review-002",
+          "state": "pending",
+          "reference": "CHUPRESYS-0002",
+          "subject": "Activate — Enterprise Account",
+          "owner": "Jordan Lee",
+          "priority": "Medium",
+          "dueDate": "2026-08-03",
+          "notes": "Demo quality review record for enterprise account; verify evidence and next action before completion."
+        },
+        {
+          "id": "quality-review-003",
+          "state": "pending",
+          "reference": "CHUPRESYS-0003",
+          "subject": "Activate — Quarterly Cycle",
+          "owner": "Taylor Brooks",
+          "priority": "High",
+          "dueDate": "2026-08-05",
+          "notes": "Demo quality review record for quarterly cycle; verify evidence and next action before completion."
+        },
+        {
+          "id": "quality-review-004",
+          "state": "pending",
+          "reference": "CHUPRESYS-0004",
+          "subject": "Activate — Priority Queue",
+          "owner": "Morgan Chen",
+          "priority": "Critical",
+          "dueDate": "2026-08-07",
+          "notes": "Demo quality review record for priority queue; verify evidence and next action before completion."
+        },
+        {
+          "id": "quality-review-005",
+          "state": "pending",
+          "reference": "CHUPRESYS-0005",
+          "subject": "Activate — Operations Review",
+          "owner": "Riley Patel",
+          "priority": "Low",
+          "dueDate": "2026-08-09",
+          "notes": "Demo quality review record for operations review; verify evidence and next action before completion."
+        },
+        {
+          "id": "quality-review-006",
+          "state": "pending",
+          "reference": "CHUPRESYS-0006",
+          "subject": "Activate — Customer Request",
+          "owner": "Casey Nguyen",
+          "priority": "Medium",
+          "dueDate": "2026-08-11",
+          "notes": "Demo quality review record for customer request; verify evidence and next action before completion."
+        },
+        {
+          "id": "quality-review-007",
+          "state": "pending",
+          "reference": "CHUPRESYS-0007",
+          "subject": "Activate — Compliance Check",
+          "owner": "Cameron Diaz",
+          "priority": "High",
+          "dueDate": "2026-08-13",
+          "notes": "Demo quality review record for compliance check; verify evidence and next action before completion."
+        },
+        {
+          "id": "quality-review-008",
+          "state": "pending",
+          "reference": "CHUPRESYS-0008",
+          "subject": "Activate — Service Window",
+          "owner": "Drew Wilson",
+          "priority": "Critical",
+          "dueDate": "2026-08-15",
+          "notes": "Demo quality review record for service window; verify evidence and next action before completion."
+        },
+        {
+          "id": "quality-review-009",
+          "state": "pending",
+          "reference": "CHUPRESYS-0009",
+          "subject": "Activate — Quality Sample",
+          "owner": "Emerson Clark",
+          "priority": "Low",
+          "dueDate": "2026-08-17",
+          "notes": "Demo quality review record for quality sample; verify evidence and next action before completion."
+        },
+        {
+          "id": "quality-review-010",
+          "state": "pending",
+          "reference": "CHUPRESYS-0010",
+          "subject": "Activate — Management Review",
+          "owner": "Hayden Kim",
+          "priority": "Medium",
+          "dueDate": "2026-08-19",
+          "notes": "Demo quality review record for management review; verify evidence and next action before completion."
+        },
+        {
+          "id": "quality-review-011",
+          "state": "pending",
+          "reference": "CHUPRESYS-0011",
+          "subject": "Activate — Exception Follow-up",
+          "owner": "Jamie Rivera",
+          "priority": "High",
+          "dueDate": "2026-08-21",
+          "notes": "Demo quality review record for exception follow-up; verify evidence and next action before completion."
+        },
+        {
+          "id": "quality-review-012",
+          "state": "pending",
+          "reference": "CHUPRESYS-0012",
+          "subject": "Activate — Evidence Package",
+          "owner": "Kai Thompson",
+          "priority": "Critical",
+          "dueDate": "2026-08-23",
+          "notes": "Demo quality review record for evidence package; verify evidence and next action before completion."
+        },
+        {
+          "id": "quality-review-013",
+          "state": "pending",
+          "reference": "CHUPRESYS-0013",
+          "subject": "Activate — Planning Cycle",
+          "owner": "Logan Shah",
+          "priority": "Low",
+          "dueDate": "2026-08-25",
+          "notes": "Demo quality review record for planning cycle; verify evidence and next action before completion."
+        },
+        {
+          "id": "quality-review-014",
+          "state": "pending",
+          "reference": "CHUPRESYS-0014",
+          "subject": "Activate — Performance Review",
+          "owner": "Parker Evans",
+          "priority": "Medium",
+          "dueDate": "2026-08-27",
+          "notes": "Demo quality review record for performance review; verify evidence and next action before completion."
+        },
+        {
+          "id": "quality-review-015",
+          "state": "pending",
+          "reference": "CHUPRESYS-0015",
+          "subject": "Activate — Final Verification",
+          "owner": "Quinn Murphy",
+          "priority": "High",
+          "dueDate": "2026-08-29",
+          "notes": "Demo quality review record for final verification; verify evidence and next action before completion."
+        }
+      ]
+    },
+    {
+      "id": "risk-assessment",
+      "title": "Ad Copy Risk Assessment",
+      "description": "Manage risk assessment for Ad Copy within Churn Prediction System, with explicit ownership, due dates, state transitions, and audit history.",
+      "fields": [
+        {
+          "key": "reference",
+          "label": "Reference",
+          "type": "text",
+          "required": true
+        },
+        {
+          "key": "subject",
+          "label": "Ad Copy Subject",
+          "type": "text",
+          "required": true
+        },
+        {
+          "key": "owner",
+          "label": "Owner",
+          "type": "text",
+          "required": true
+        },
+        {
+          "key": "priority",
+          "label": "Priority",
+          "type": "select",
+          "required": true,
+          "options": [
+            "Low",
+            "Medium",
+            "High",
+            "Critical"
+          ]
+        },
+        {
+          "key": "dueDate",
+          "label": "Due Date",
+          "type": "date",
+          "required": true
+        },
+        {
+          "key": "notes",
+          "label": "Operational Notes",
+          "type": "textarea",
+          "required": true
+        }
+      ],
+      "states": [
+        "identified",
+        "assessing",
+        "mitigating",
+        "accepted",
+        "closed"
+      ],
+      "transitions": [
+        {
+          "id": "assess",
+          "label": "Assess Risk",
+          "from": [
+            "identified"
+          ],
+          "to": "assessing"
+        },
+        {
+          "id": "mitigate",
+          "label": "Plan Mitigation",
+          "from": [
+            "assessing"
+          ],
+          "to": "mitigating"
+        },
+        {
+          "id": "accept",
+          "label": "Accept Risk",
+          "from": [
+            "assessing",
+            "mitigating"
+          ],
+          "to": "accepted"
+        },
+        {
+          "id": "close",
+          "label": "Close Risk",
+          "from": [
+            "accepted"
+          ],
+          "to": "closed"
+        }
+      ],
+      "seeds": [
+        {
+          "id": "risk-assessment-001",
+          "state": "identified",
+          "reference": "CHUPRESYS-0001",
+          "subject": "Ad Copy — North Region",
+          "owner": "Avery Morgan",
+          "priority": "Low",
+          "dueDate": "2026-08-01",
+          "notes": "Demo risk assessment record for north region; verify evidence and next action before completion."
+        },
+        {
+          "id": "risk-assessment-002",
+          "state": "identified",
+          "reference": "CHUPRESYS-0002",
+          "subject": "Ad Copy — Enterprise Account",
+          "owner": "Jordan Lee",
+          "priority": "Medium",
+          "dueDate": "2026-08-03",
+          "notes": "Demo risk assessment record for enterprise account; verify evidence and next action before completion."
+        },
+        {
+          "id": "risk-assessment-003",
+          "state": "identified",
+          "reference": "CHUPRESYS-0003",
+          "subject": "Ad Copy — Quarterly Cycle",
+          "owner": "Taylor Brooks",
+          "priority": "High",
+          "dueDate": "2026-08-05",
+          "notes": "Demo risk assessment record for quarterly cycle; verify evidence and next action before completion."
+        },
+        {
+          "id": "risk-assessment-004",
+          "state": "identified",
+          "reference": "CHUPRESYS-0004",
+          "subject": "Ad Copy — Priority Queue",
+          "owner": "Morgan Chen",
+          "priority": "Critical",
+          "dueDate": "2026-08-07",
+          "notes": "Demo risk assessment record for priority queue; verify evidence and next action before completion."
+        },
+        {
+          "id": "risk-assessment-005",
+          "state": "identified",
+          "reference": "CHUPRESYS-0005",
+          "subject": "Ad Copy — Operations Review",
+          "owner": "Riley Patel",
+          "priority": "Low",
+          "dueDate": "2026-08-09",
+          "notes": "Demo risk assessment record for operations review; verify evidence and next action before completion."
+        },
+        {
+          "id": "risk-assessment-006",
+          "state": "identified",
+          "reference": "CHUPRESYS-0006",
+          "subject": "Ad Copy — Customer Request",
+          "owner": "Casey Nguyen",
+          "priority": "Medium",
+          "dueDate": "2026-08-11",
+          "notes": "Demo risk assessment record for customer request; verify evidence and next action before completion."
+        },
+        {
+          "id": "risk-assessment-007",
+          "state": "identified",
+          "reference": "CHUPRESYS-0007",
+          "subject": "Ad Copy — Compliance Check",
+          "owner": "Cameron Diaz",
+          "priority": "High",
+          "dueDate": "2026-08-13",
+          "notes": "Demo risk assessment record for compliance check; verify evidence and next action before completion."
+        },
+        {
+          "id": "risk-assessment-008",
+          "state": "identified",
+          "reference": "CHUPRESYS-0008",
+          "subject": "Ad Copy — Service Window",
+          "owner": "Drew Wilson",
+          "priority": "Critical",
+          "dueDate": "2026-08-15",
+          "notes": "Demo risk assessment record for service window; verify evidence and next action before completion."
+        },
+        {
+          "id": "risk-assessment-009",
+          "state": "identified",
+          "reference": "CHUPRESYS-0009",
+          "subject": "Ad Copy — Quality Sample",
+          "owner": "Emerson Clark",
+          "priority": "Low",
+          "dueDate": "2026-08-17",
+          "notes": "Demo risk assessment record for quality sample; verify evidence and next action before completion."
+        },
+        {
+          "id": "risk-assessment-010",
+          "state": "identified",
+          "reference": "CHUPRESYS-0010",
+          "subject": "Ad Copy — Management Review",
+          "owner": "Hayden Kim",
+          "priority": "Medium",
+          "dueDate": "2026-08-19",
+          "notes": "Demo risk assessment record for management review; verify evidence and next action before completion."
+        },
+        {
+          "id": "risk-assessment-011",
+          "state": "identified",
+          "reference": "CHUPRESYS-0011",
+          "subject": "Ad Copy — Exception Follow-up",
+          "owner": "Jamie Rivera",
+          "priority": "High",
+          "dueDate": "2026-08-21",
+          "notes": "Demo risk assessment record for exception follow-up; verify evidence and next action before completion."
+        },
+        {
+          "id": "risk-assessment-012",
+          "state": "identified",
+          "reference": "CHUPRESYS-0012",
+          "subject": "Ad Copy — Evidence Package",
+          "owner": "Kai Thompson",
+          "priority": "Critical",
+          "dueDate": "2026-08-23",
+          "notes": "Demo risk assessment record for evidence package; verify evidence and next action before completion."
+        },
+        {
+          "id": "risk-assessment-013",
+          "state": "identified",
+          "reference": "CHUPRESYS-0013",
+          "subject": "Ad Copy — Planning Cycle",
+          "owner": "Logan Shah",
+          "priority": "Low",
+          "dueDate": "2026-08-25",
+          "notes": "Demo risk assessment record for planning cycle; verify evidence and next action before completion."
+        },
+        {
+          "id": "risk-assessment-014",
+          "state": "identified",
+          "reference": "CHUPRESYS-0014",
+          "subject": "Ad Copy — Performance Review",
+          "owner": "Parker Evans",
+          "priority": "Medium",
+          "dueDate": "2026-08-27",
+          "notes": "Demo risk assessment record for performance review; verify evidence and next action before completion."
+        },
+        {
+          "id": "risk-assessment-015",
+          "state": "identified",
+          "reference": "CHUPRESYS-0015",
+          "subject": "Ad Copy — Final Verification",
+          "owner": "Quinn Murphy",
+          "priority": "High",
+          "dueDate": "2026-08-29",
+          "notes": "Demo risk assessment record for final verification; verify evidence and next action before completion."
+        }
+      ]
+    },
+    {
+      "id": "evidence-management",
+      "title": "Ad Platforms Evidence Management",
+      "description": "Manage evidence management for Ad Platforms within Churn Prediction System, with explicit ownership, due dates, state transitions, and audit history.",
+      "fields": [
+        {
+          "key": "reference",
+          "label": "Reference",
+          "type": "text",
+          "required": true
+        },
+        {
+          "key": "subject",
+          "label": "Ad Platforms Subject",
+          "type": "text",
+          "required": true
+        },
+        {
+          "key": "owner",
+          "label": "Owner",
+          "type": "text",
+          "required": true
+        },
+        {
+          "key": "priority",
+          "label": "Priority",
+          "type": "select",
+          "required": true,
+          "options": [
+            "Low",
+            "Medium",
+            "High",
+            "Critical"
+          ]
+        },
+        {
+          "key": "dueDate",
+          "label": "Due Date",
+          "type": "date",
+          "required": true
+        },
+        {
+          "key": "notes",
+          "label": "Operational Notes",
+          "type": "textarea",
+          "required": true
+        }
+      ],
+      "states": [
+        "requested",
+        "collected",
+        "reviewing",
+        "verified",
+        "archived"
+      ],
+      "transitions": [
+        {
+          "id": "collect",
+          "label": "Collect Evidence",
+          "from": [
+            "requested"
+          ],
+          "to": "collected"
+        },
+        {
+          "id": "review",
+          "label": "Review Evidence",
+          "from": [
+            "collected"
+          ],
+          "to": "reviewing"
+        },
+        {
+          "id": "verify",
+          "label": "Verify Evidence",
+          "from": [
+            "reviewing"
+          ],
+          "to": "verified"
+        },
+        {
+          "id": "archive",
+          "label": "Archive Evidence",
+          "from": [
+            "verified"
+          ],
+          "to": "archived"
+        }
+      ],
+      "seeds": [
+        {
+          "id": "evidence-management-001",
+          "state": "requested",
+          "reference": "CHUPRESYS-0001",
+          "subject": "Ad Platforms — North Region",
+          "owner": "Avery Morgan",
+          "priority": "Low",
+          "dueDate": "2026-08-01",
+          "notes": "Demo evidence management record for north region; verify evidence and next action before completion."
+        },
+        {
+          "id": "evidence-management-002",
+          "state": "requested",
+          "reference": "CHUPRESYS-0002",
+          "subject": "Ad Platforms — Enterprise Account",
+          "owner": "Jordan Lee",
+          "priority": "Medium",
+          "dueDate": "2026-08-03",
+          "notes": "Demo evidence management record for enterprise account; verify evidence and next action before completion."
+        },
+        {
+          "id": "evidence-management-003",
+          "state": "requested",
+          "reference": "CHUPRESYS-0003",
+          "subject": "Ad Platforms — Quarterly Cycle",
+          "owner": "Taylor Brooks",
+          "priority": "High",
+          "dueDate": "2026-08-05",
+          "notes": "Demo evidence management record for quarterly cycle; verify evidence and next action before completion."
+        },
+        {
+          "id": "evidence-management-004",
+          "state": "requested",
+          "reference": "CHUPRESYS-0004",
+          "subject": "Ad Platforms — Priority Queue",
+          "owner": "Morgan Chen",
+          "priority": "Critical",
+          "dueDate": "2026-08-07",
+          "notes": "Demo evidence management record for priority queue; verify evidence and next action before completion."
+        },
+        {
+          "id": "evidence-management-005",
+          "state": "requested",
+          "reference": "CHUPRESYS-0005",
+          "subject": "Ad Platforms — Operations Review",
+          "owner": "Riley Patel",
+          "priority": "Low",
+          "dueDate": "2026-08-09",
+          "notes": "Demo evidence management record for operations review; verify evidence and next action before completion."
+        },
+        {
+          "id": "evidence-management-006",
+          "state": "requested",
+          "reference": "CHUPRESYS-0006",
+          "subject": "Ad Platforms — Customer Request",
+          "owner": "Casey Nguyen",
+          "priority": "Medium",
+          "dueDate": "2026-08-11",
+          "notes": "Demo evidence management record for customer request; verify evidence and next action before completion."
+        },
+        {
+          "id": "evidence-management-007",
+          "state": "requested",
+          "reference": "CHUPRESYS-0007",
+          "subject": "Ad Platforms — Compliance Check",
+          "owner": "Cameron Diaz",
+          "priority": "High",
+          "dueDate": "2026-08-13",
+          "notes": "Demo evidence management record for compliance check; verify evidence and next action before completion."
+        },
+        {
+          "id": "evidence-management-008",
+          "state": "requested",
+          "reference": "CHUPRESYS-0008",
+          "subject": "Ad Platforms — Service Window",
+          "owner": "Drew Wilson",
+          "priority": "Critical",
+          "dueDate": "2026-08-15",
+          "notes": "Demo evidence management record for service window; verify evidence and next action before completion."
+        },
+        {
+          "id": "evidence-management-009",
+          "state": "requested",
+          "reference": "CHUPRESYS-0009",
+          "subject": "Ad Platforms — Quality Sample",
+          "owner": "Emerson Clark",
+          "priority": "Low",
+          "dueDate": "2026-08-17",
+          "notes": "Demo evidence management record for quality sample; verify evidence and next action before completion."
+        },
+        {
+          "id": "evidence-management-010",
+          "state": "requested",
+          "reference": "CHUPRESYS-0010",
+          "subject": "Ad Platforms — Management Review",
+          "owner": "Hayden Kim",
+          "priority": "Medium",
+          "dueDate": "2026-08-19",
+          "notes": "Demo evidence management record for management review; verify evidence and next action before completion."
+        },
+        {
+          "id": "evidence-management-011",
+          "state": "requested",
+          "reference": "CHUPRESYS-0011",
+          "subject": "Ad Platforms — Exception Follow-up",
+          "owner": "Jamie Rivera",
+          "priority": "High",
+          "dueDate": "2026-08-21",
+          "notes": "Demo evidence management record for exception follow-up; verify evidence and next action before completion."
+        },
+        {
+          "id": "evidence-management-012",
+          "state": "requested",
+          "reference": "CHUPRESYS-0012",
+          "subject": "Ad Platforms — Evidence Package",
+          "owner": "Kai Thompson",
+          "priority": "Critical",
+          "dueDate": "2026-08-23",
+          "notes": "Demo evidence management record for evidence package; verify evidence and next action before completion."
+        },
+        {
+          "id": "evidence-management-013",
+          "state": "requested",
+          "reference": "CHUPRESYS-0013",
+          "subject": "Ad Platforms — Planning Cycle",
+          "owner": "Logan Shah",
+          "priority": "Low",
+          "dueDate": "2026-08-25",
+          "notes": "Demo evidence management record for planning cycle; verify evidence and next action before completion."
+        },
+        {
+          "id": "evidence-management-014",
+          "state": "requested",
+          "reference": "CHUPRESYS-0014",
+          "subject": "Ad Platforms — Performance Review",
+          "owner": "Parker Evans",
+          "priority": "Medium",
+          "dueDate": "2026-08-27",
+          "notes": "Demo evidence management record for performance review; verify evidence and next action before completion."
+        },
+        {
+          "id": "evidence-management-015",
+          "state": "requested",
+          "reference": "CHUPRESYS-0015",
+          "subject": "Ad Platforms — Final Verification",
+          "owner": "Quinn Murphy",
+          "priority": "High",
+          "dueDate": "2026-08-29",
+          "notes": "Demo evidence management record for final verification; verify evidence and next action before completion."
+        }
+      ]
+    },
+    {
+      "id": "exception-resolution",
+      "title": "AI Content Types Exception Resolution",
+      "description": "Manage exception resolution for AI Content Types within Churn Prediction System, with explicit ownership, due dates, state transitions, and audit history.",
+      "fields": [
+        {
+          "key": "reference",
+          "label": "Reference",
+          "type": "text",
+          "required": true
+        },
+        {
+          "key": "subject",
+          "label": "AI Content Types Subject",
+          "type": "text",
+          "required": true
+        },
+        {
+          "key": "owner",
+          "label": "Owner",
+          "type": "text",
+          "required": true
+        },
+        {
+          "key": "priority",
+          "label": "Priority",
+          "type": "select",
+          "required": true,
+          "options": [
+            "Low",
+            "Medium",
+            "High",
+            "Critical"
+          ]
+        },
+        {
+          "key": "dueDate",
+          "label": "Due Date",
+          "type": "date",
+          "required": true
+        },
+        {
+          "key": "notes",
+          "label": "Operational Notes",
+          "type": "textarea",
+          "required": true
+        }
+      ],
+      "states": [
+        "open",
+        "investigating",
+        "remediating",
+        "resolved",
+        "waived"
+      ],
+      "transitions": [
+        {
+          "id": "investigate",
+          "label": "Investigate Exception",
+          "from": [
+            "open"
+          ],
+          "to": "investigating"
+        },
+        {
+          "id": "remediate",
+          "label": "Start Remediation",
+          "from": [
+            "investigating"
+          ],
+          "to": "remediating"
+        },
+        {
+          "id": "resolve",
+          "label": "Resolve Exception",
+          "from": [
+            "investigating",
+            "remediating"
+          ],
+          "to": "resolved"
+        },
+        {
+          "id": "waive",
+          "label": "Approve Waiver",
+          "from": [
+            "investigating"
+          ],
+          "to": "waived"
+        }
+      ],
+      "seeds": [
+        {
+          "id": "exception-resolution-001",
+          "state": "open",
+          "reference": "CHUPRESYS-0001",
+          "subject": "AI Content Types — North Region",
+          "owner": "Avery Morgan",
+          "priority": "Low",
+          "dueDate": "2026-08-01",
+          "notes": "Demo exception resolution record for north region; verify evidence and next action before completion."
+        },
+        {
+          "id": "exception-resolution-002",
+          "state": "open",
+          "reference": "CHUPRESYS-0002",
+          "subject": "AI Content Types — Enterprise Account",
+          "owner": "Jordan Lee",
+          "priority": "Medium",
+          "dueDate": "2026-08-03",
+          "notes": "Demo exception resolution record for enterprise account; verify evidence and next action before completion."
+        },
+        {
+          "id": "exception-resolution-003",
+          "state": "open",
+          "reference": "CHUPRESYS-0003",
+          "subject": "AI Content Types — Quarterly Cycle",
+          "owner": "Taylor Brooks",
+          "priority": "High",
+          "dueDate": "2026-08-05",
+          "notes": "Demo exception resolution record for quarterly cycle; verify evidence and next action before completion."
+        },
+        {
+          "id": "exception-resolution-004",
+          "state": "open",
+          "reference": "CHUPRESYS-0004",
+          "subject": "AI Content Types — Priority Queue",
+          "owner": "Morgan Chen",
+          "priority": "Critical",
+          "dueDate": "2026-08-07",
+          "notes": "Demo exception resolution record for priority queue; verify evidence and next action before completion."
+        },
+        {
+          "id": "exception-resolution-005",
+          "state": "open",
+          "reference": "CHUPRESYS-0005",
+          "subject": "AI Content Types — Operations Review",
+          "owner": "Riley Patel",
+          "priority": "Low",
+          "dueDate": "2026-08-09",
+          "notes": "Demo exception resolution record for operations review; verify evidence and next action before completion."
+        },
+        {
+          "id": "exception-resolution-006",
+          "state": "open",
+          "reference": "CHUPRESYS-0006",
+          "subject": "AI Content Types — Customer Request",
+          "owner": "Casey Nguyen",
+          "priority": "Medium",
+          "dueDate": "2026-08-11",
+          "notes": "Demo exception resolution record for customer request; verify evidence and next action before completion."
+        },
+        {
+          "id": "exception-resolution-007",
+          "state": "open",
+          "reference": "CHUPRESYS-0007",
+          "subject": "AI Content Types — Compliance Check",
+          "owner": "Cameron Diaz",
+          "priority": "High",
+          "dueDate": "2026-08-13",
+          "notes": "Demo exception resolution record for compliance check; verify evidence and next action before completion."
+        },
+        {
+          "id": "exception-resolution-008",
+          "state": "open",
+          "reference": "CHUPRESYS-0008",
+          "subject": "AI Content Types — Service Window",
+          "owner": "Drew Wilson",
+          "priority": "Critical",
+          "dueDate": "2026-08-15",
+          "notes": "Demo exception resolution record for service window; verify evidence and next action before completion."
+        },
+        {
+          "id": "exception-resolution-009",
+          "state": "open",
+          "reference": "CHUPRESYS-0009",
+          "subject": "AI Content Types — Quality Sample",
+          "owner": "Emerson Clark",
+          "priority": "Low",
+          "dueDate": "2026-08-17",
+          "notes": "Demo exception resolution record for quality sample; verify evidence and next action before completion."
+        },
+        {
+          "id": "exception-resolution-010",
+          "state": "open",
+          "reference": "CHUPRESYS-0010",
+          "subject": "AI Content Types — Management Review",
+          "owner": "Hayden Kim",
+          "priority": "Medium",
+          "dueDate": "2026-08-19",
+          "notes": "Demo exception resolution record for management review; verify evidence and next action before completion."
+        },
+        {
+          "id": "exception-resolution-011",
+          "state": "open",
+          "reference": "CHUPRESYS-0011",
+          "subject": "AI Content Types — Exception Follow-up",
+          "owner": "Jamie Rivera",
+          "priority": "High",
+          "dueDate": "2026-08-21",
+          "notes": "Demo exception resolution record for exception follow-up; verify evidence and next action before completion."
+        },
+        {
+          "id": "exception-resolution-012",
+          "state": "open",
+          "reference": "CHUPRESYS-0012",
+          "subject": "AI Content Types — Evidence Package",
+          "owner": "Kai Thompson",
+          "priority": "Critical",
+          "dueDate": "2026-08-23",
+          "notes": "Demo exception resolution record for evidence package; verify evidence and next action before completion."
+        },
+        {
+          "id": "exception-resolution-013",
+          "state": "open",
+          "reference": "CHUPRESYS-0013",
+          "subject": "AI Content Types — Planning Cycle",
+          "owner": "Logan Shah",
+          "priority": "Low",
+          "dueDate": "2026-08-25",
+          "notes": "Demo exception resolution record for planning cycle; verify evidence and next action before completion."
+        },
+        {
+          "id": "exception-resolution-014",
+          "state": "open",
+          "reference": "CHUPRESYS-0014",
+          "subject": "AI Content Types — Performance Review",
+          "owner": "Parker Evans",
+          "priority": "Medium",
+          "dueDate": "2026-08-27",
+          "notes": "Demo exception resolution record for performance review; verify evidence and next action before completion."
+        },
+        {
+          "id": "exception-resolution-015",
+          "state": "open",
+          "reference": "CHUPRESYS-0015",
+          "subject": "AI Content Types — Final Verification",
+          "owner": "Quinn Murphy",
+          "priority": "High",
+          "dueDate": "2026-08-29",
+          "notes": "Demo exception resolution record for final verification; verify evidence and next action before completion."
+        }
+      ]
+    },
+    {
+      "id": "approval-control",
+      "title": "AI Reports Approval Control",
+      "description": "Manage approval control for AI Reports within Churn Prediction System, with explicit ownership, due dates, state transitions, and audit history.",
+      "fields": [
+        {
+          "key": "reference",
+          "label": "Reference",
+          "type": "text",
+          "required": true
+        },
+        {
+          "key": "subject",
+          "label": "AI Reports Subject",
+          "type": "text",
+          "required": true
+        },
+        {
+          "key": "owner",
+          "label": "Owner",
+          "type": "text",
+          "required": true
+        },
+        {
+          "key": "priority",
+          "label": "Priority",
+          "type": "select",
+          "required": true,
+          "options": [
+            "Low",
+            "Medium",
+            "High",
+            "Critical"
+          ]
+        },
+        {
+          "key": "dueDate",
+          "label": "Due Date",
+          "type": "date",
+          "required": true
+        },
+        {
+          "key": "notes",
+          "label": "Operational Notes",
+          "type": "textarea",
+          "required": true
+        }
+      ],
+      "states": [
+        "prepared",
+        "submitted",
+        "reviewing",
         "approved",
         "declined"
       ],
       "transitions": [
         {
-          "id": "retention-offer-review-eligibility_review",
-          "label": "Move to eligibility review",
+          "id": "submit",
+          "label": "Submit for Approval",
           "from": [
-            "proposed"
+            "prepared"
           ],
-          "to": "eligibility_review"
+          "to": "submitted"
         },
         {
-          "id": "retention-offer-review-approved",
-          "label": "Move to approved",
+          "id": "review",
+          "label": "Begin Approval Review",
           "from": [
-            "eligibility_review"
+            "submitted"
+          ],
+          "to": "reviewing"
+        },
+        {
+          "id": "approve",
+          "label": "Approve",
+          "from": [
+            "reviewing"
           ],
           "to": "approved"
         },
         {
-          "id": "retention-offer-review-declined",
-          "label": "Move to declined",
+          "id": "decline",
+          "label": "Decline",
           "from": [
-            "approved"
+            "submitted",
+            "reviewing"
           ],
           "to": "declined"
         }
       ],
       "seeds": [
         {
-          "id": "retention-offer-review-demo",
-          "state": "proposed",
-          "customerReference": "CUS-DEMO-2048",
-          "offerType": "Success package",
-          "offerValue": 3500,
-          "marginImpactPercent": 3.2,
-          "rationale": "Address adoption gap before renewal without changing list price."
+          "id": "approval-control-001",
+          "state": "prepared",
+          "reference": "CHUPRESYS-0001",
+          "subject": "AI Reports — North Region",
+          "owner": "Avery Morgan",
+          "priority": "Low",
+          "dueDate": "2026-08-01",
+          "notes": "Demo approval control record for north region; verify evidence and next action before completion."
+        },
+        {
+          "id": "approval-control-002",
+          "state": "prepared",
+          "reference": "CHUPRESYS-0002",
+          "subject": "AI Reports — Enterprise Account",
+          "owner": "Jordan Lee",
+          "priority": "Medium",
+          "dueDate": "2026-08-03",
+          "notes": "Demo approval control record for enterprise account; verify evidence and next action before completion."
+        },
+        {
+          "id": "approval-control-003",
+          "state": "prepared",
+          "reference": "CHUPRESYS-0003",
+          "subject": "AI Reports — Quarterly Cycle",
+          "owner": "Taylor Brooks",
+          "priority": "High",
+          "dueDate": "2026-08-05",
+          "notes": "Demo approval control record for quarterly cycle; verify evidence and next action before completion."
+        },
+        {
+          "id": "approval-control-004",
+          "state": "prepared",
+          "reference": "CHUPRESYS-0004",
+          "subject": "AI Reports — Priority Queue",
+          "owner": "Morgan Chen",
+          "priority": "Critical",
+          "dueDate": "2026-08-07",
+          "notes": "Demo approval control record for priority queue; verify evidence and next action before completion."
+        },
+        {
+          "id": "approval-control-005",
+          "state": "prepared",
+          "reference": "CHUPRESYS-0005",
+          "subject": "AI Reports — Operations Review",
+          "owner": "Riley Patel",
+          "priority": "Low",
+          "dueDate": "2026-08-09",
+          "notes": "Demo approval control record for operations review; verify evidence and next action before completion."
+        },
+        {
+          "id": "approval-control-006",
+          "state": "prepared",
+          "reference": "CHUPRESYS-0006",
+          "subject": "AI Reports — Customer Request",
+          "owner": "Casey Nguyen",
+          "priority": "Medium",
+          "dueDate": "2026-08-11",
+          "notes": "Demo approval control record for customer request; verify evidence and next action before completion."
+        },
+        {
+          "id": "approval-control-007",
+          "state": "prepared",
+          "reference": "CHUPRESYS-0007",
+          "subject": "AI Reports — Compliance Check",
+          "owner": "Cameron Diaz",
+          "priority": "High",
+          "dueDate": "2026-08-13",
+          "notes": "Demo approval control record for compliance check; verify evidence and next action before completion."
+        },
+        {
+          "id": "approval-control-008",
+          "state": "prepared",
+          "reference": "CHUPRESYS-0008",
+          "subject": "AI Reports — Service Window",
+          "owner": "Drew Wilson",
+          "priority": "Critical",
+          "dueDate": "2026-08-15",
+          "notes": "Demo approval control record for service window; verify evidence and next action before completion."
+        },
+        {
+          "id": "approval-control-009",
+          "state": "prepared",
+          "reference": "CHUPRESYS-0009",
+          "subject": "AI Reports — Quality Sample",
+          "owner": "Emerson Clark",
+          "priority": "Low",
+          "dueDate": "2026-08-17",
+          "notes": "Demo approval control record for quality sample; verify evidence and next action before completion."
+        },
+        {
+          "id": "approval-control-010",
+          "state": "prepared",
+          "reference": "CHUPRESYS-0010",
+          "subject": "AI Reports — Management Review",
+          "owner": "Hayden Kim",
+          "priority": "Medium",
+          "dueDate": "2026-08-19",
+          "notes": "Demo approval control record for management review; verify evidence and next action before completion."
+        },
+        {
+          "id": "approval-control-011",
+          "state": "prepared",
+          "reference": "CHUPRESYS-0011",
+          "subject": "AI Reports — Exception Follow-up",
+          "owner": "Jamie Rivera",
+          "priority": "High",
+          "dueDate": "2026-08-21",
+          "notes": "Demo approval control record for exception follow-up; verify evidence and next action before completion."
+        },
+        {
+          "id": "approval-control-012",
+          "state": "prepared",
+          "reference": "CHUPRESYS-0012",
+          "subject": "AI Reports — Evidence Package",
+          "owner": "Kai Thompson",
+          "priority": "Critical",
+          "dueDate": "2026-08-23",
+          "notes": "Demo approval control record for evidence package; verify evidence and next action before completion."
+        },
+        {
+          "id": "approval-control-013",
+          "state": "prepared",
+          "reference": "CHUPRESYS-0013",
+          "subject": "AI Reports — Planning Cycle",
+          "owner": "Logan Shah",
+          "priority": "Low",
+          "dueDate": "2026-08-25",
+          "notes": "Demo approval control record for planning cycle; verify evidence and next action before completion."
+        },
+        {
+          "id": "approval-control-014",
+          "state": "prepared",
+          "reference": "CHUPRESYS-0014",
+          "subject": "AI Reports — Performance Review",
+          "owner": "Parker Evans",
+          "priority": "Medium",
+          "dueDate": "2026-08-27",
+          "notes": "Demo approval control record for performance review; verify evidence and next action before completion."
+        },
+        {
+          "id": "approval-control-015",
+          "state": "prepared",
+          "reference": "CHUPRESYS-0015",
+          "subject": "AI Reports — Final Verification",
+          "owner": "Quinn Murphy",
+          "priority": "High",
+          "dueDate": "2026-08-29",
+          "notes": "Demo approval control record for final verification; verify evidence and next action before completion."
         }
       ]
     },
     {
-      "id": "intervention-orchestration",
-      "title": "Intervention Orchestration",
-      "description": "Assign a human-reviewed retention play, track consent and outreach status, and record the observed outcome.",
+      "id": "performance-reporting",
+      "title": "AI Tones Performance Reporting",
+      "description": "Manage performance reporting for AI Tones within Churn Prediction System, with explicit ownership, due dates, state transitions, and audit history.",
       "fields": [
         {
-          "key": "customerReference",
-          "label": "Customer reference",
+          "key": "reference",
+          "label": "Reference",
           "type": "text",
-          "required": true,
-          "default": "CUS-DEMO-2048"
+          "required": true
         },
         {
-          "key": "playbook",
-          "label": "Playbook",
-          "type": "select",
-          "required": true,
-          "options": [
-            "Executive success review",
-            "Adoption workshop",
-            "Support recovery",
-            "Renewal consultation"
-          ],
-          "default": "Executive success review"
+          "key": "subject",
+          "label": "AI Tones Subject",
+          "type": "text",
+          "required": true
         },
         {
           "key": "owner",
-          "label": "Intervention owner",
+          "label": "Owner",
           "type": "text",
-          "required": true,
-          "default": "Demo Success Manager"
+          "required": true
         },
         {
-          "key": "channel",
-          "label": "Channel",
+          "key": "priority",
+          "label": "Priority",
           "type": "select",
           "required": true,
           "options": [
-            "Email",
-            "Phone",
-            "In-app",
-            "Meeting"
-          ],
-          "default": "Email"
+            "Low",
+            "Medium",
+            "High",
+            "Critical"
+          ]
         },
         {
-          "key": "outreachStatus",
-          "label": "Outreach status",
-          "type": "select",
-          "required": true,
-          "options": [
-            "Not sent",
-            "Ready for human send",
-            "Sent manually",
-            "Blocked"
-          ],
-          "default": "Not sent"
-        }
-      ],
-      "states": [
-        "planned",
-        "owner_review",
-        "authorized",
-        "completed"
-      ],
-      "transitions": [
-        {
-          "id": "intervention-orchestration-owner_review",
-          "label": "Move to owner review",
-          "from": [
-            "planned"
-          ],
-          "to": "owner_review"
+          "key": "dueDate",
+          "label": "Due Date",
+          "type": "date",
+          "required": true
         },
         {
-          "id": "intervention-orchestration-authorized",
-          "label": "Move to authorized",
-          "from": [
-            "owner_review"
-          ],
-          "to": "authorized"
-        },
-        {
-          "id": "intervention-orchestration-completed",
-          "label": "Move to completed",
-          "from": [
-            "authorized"
-          ],
-          "to": "completed"
-        }
-      ],
-      "seeds": [
-        {
-          "id": "intervention-orchestration-demo",
-          "state": "planned",
-          "customerReference": "CUS-DEMO-2048",
-          "playbook": "Executive success review",
-          "owner": "Demo Success Manager",
-          "channel": "Email",
-          "outreachStatus": "Not sent"
-        }
-      ]
-    },
-    {
-      "id": "cohort-outcome-monitoring",
-      "title": "Cohort Outcome Monitoring",
-      "description": "Compare treated and untreated cohorts, review retention lift, and publish a measured outcome report.",
-      "fields": [
-        {
-          "key": "cohortName",
-          "label": "Cohort name",
-          "type": "text",
-          "required": true,
-          "default": "2026-Q3 high-risk accounts"
-        },
-        {
-          "key": "observationWindowDays",
-          "label": "Observation window days",
-          "type": "number",
-          "required": true,
-          "default": 90
-        },
-        {
-          "key": "treatedCustomers",
-          "label": "Treated customers",
-          "type": "number",
-          "required": true,
-          "default": 80
-        },
-        {
-          "key": "retainedCustomers",
-          "label": "Retained customers",
-          "type": "number",
-          "required": true,
-          "default": 61
-        },
-        {
-          "key": "estimatedLiftPercent",
-          "label": "Estimated retention lift percent",
-          "type": "number",
-          "required": true,
-          "default": 8.4
-        }
-      ],
-      "states": [
-        "collecting",
-        "analyzing",
-        "reviewed",
-        "published"
-      ],
-      "transitions": [
-        {
-          "id": "cohort-outcome-monitoring-analyzing",
-          "label": "Move to analyzing",
-          "from": [
-            "collecting"
-          ],
-          "to": "analyzing"
-        },
-        {
-          "id": "cohort-outcome-monitoring-reviewed",
-          "label": "Move to reviewed",
-          "from": [
-            "analyzing"
-          ],
-          "to": "reviewed"
-        },
-        {
-          "id": "cohort-outcome-monitoring-published",
-          "label": "Move to published",
-          "from": [
-            "reviewed"
-          ],
-          "to": "published"
-        }
-      ],
-      "seeds": [
-        {
-          "id": "cohort-outcome-monitoring-demo",
-          "state": "collecting",
-          "cohortName": "2026-Q3 high-risk accounts",
-          "observationWindowDays": 90,
-          "treatedCustomers": 80,
-          "retainedCustomers": 61,
-          "estimatedLiftPercent": 8.4
-        }
-      ]
-    },
-    {
-      "id": "crm-integration-readiness",
-      "title": "CRM Integration Readiness",
-      "description": "Map customer, risk, task, and outcome fields and verify a CRM adapter with local or sandbox records.",
-      "fields": [
-        {
-          "key": "provider",
-          "label": "CRM provider or adapter",
-          "type": "text",
-          "required": true,
-          "default": "Local CRM fixture"
-        },
-        {
-          "key": "environment",
-          "label": "Environment",
-          "type": "select",
-          "required": true,
-          "options": [
-            "Local fixture",
-            "Sandbox configuration",
-            "Production configuration"
-          ],
-          "default": "Local fixture"
-        },
-        {
-          "key": "objects",
-          "label": "Mapped objects",
+          "key": "notes",
+          "label": "Operational Notes",
           "type": "textarea",
-          "required": true,
-          "default": "Account; Contact; Renewal; Retention Task"
-        },
-        {
-          "key": "credentialStatus",
-          "label": "Credential status",
-          "type": "select",
-          "required": true,
-          "options": [
-            "Not required for fixture",
-            "Missing",
-            "Stored externally"
-          ],
-          "default": "Not required for fixture"
-        },
-        {
-          "key": "testResult",
-          "label": "Test result",
-          "type": "select",
-          "required": true,
-          "options": [
-            "Not run",
-            "Passed with fixture",
-            "Failed",
-            "Blocked"
-          ],
-          "default": "Not run"
+          "required": true
         }
       ],
       "states": [
-        "inventoried",
-        "mapped",
-        "test_ready",
-        "verified"
+        "requested",
+        "preparing",
+        "ready",
+        "delivered",
+        "failed"
       ],
       "transitions": [
         {
-          "id": "crm-integration-readiness-mapped",
-          "label": "Move to mapped",
+          "id": "prepare",
+          "label": "Prepare Report",
           "from": [
-            "inventoried"
+            "requested",
+            "failed"
           ],
-          "to": "mapped"
+          "to": "preparing"
         },
         {
-          "id": "crm-integration-readiness-test_ready",
-          "label": "Move to test ready",
+          "id": "ready",
+          "label": "Mark Ready",
           "from": [
-            "mapped"
+            "preparing"
           ],
-          "to": "test_ready"
+          "to": "ready"
         },
         {
-          "id": "crm-integration-readiness-verified",
-          "label": "Move to verified",
+          "id": "deliver",
+          "label": "Record Delivery",
           "from": [
-            "test_ready"
+            "ready"
           ],
-          "to": "verified"
+          "to": "delivered"
+        },
+        {
+          "id": "fail",
+          "label": "Record Failure",
+          "from": [
+            "preparing"
+          ],
+          "to": "failed"
         }
       ],
       "seeds": [
         {
-          "id": "crm-integration-readiness-demo",
-          "state": "inventoried",
-          "provider": "Local CRM fixture",
-          "environment": "Local fixture",
-          "objects": "Account; Contact; Renewal; Retention Task",
-          "credentialStatus": "Not required for fixture",
-          "testResult": "Not run"
+          "id": "performance-reporting-001",
+          "state": "requested",
+          "reference": "CHUPRESYS-0001",
+          "subject": "AI Tones — North Region",
+          "owner": "Avery Morgan",
+          "priority": "Low",
+          "dueDate": "2026-08-01",
+          "notes": "Demo performance reporting record for north region; verify evidence and next action before completion."
+        },
+        {
+          "id": "performance-reporting-002",
+          "state": "requested",
+          "reference": "CHUPRESYS-0002",
+          "subject": "AI Tones — Enterprise Account",
+          "owner": "Jordan Lee",
+          "priority": "Medium",
+          "dueDate": "2026-08-03",
+          "notes": "Demo performance reporting record for enterprise account; verify evidence and next action before completion."
+        },
+        {
+          "id": "performance-reporting-003",
+          "state": "requested",
+          "reference": "CHUPRESYS-0003",
+          "subject": "AI Tones — Quarterly Cycle",
+          "owner": "Taylor Brooks",
+          "priority": "High",
+          "dueDate": "2026-08-05",
+          "notes": "Demo performance reporting record for quarterly cycle; verify evidence and next action before completion."
+        },
+        {
+          "id": "performance-reporting-004",
+          "state": "requested",
+          "reference": "CHUPRESYS-0004",
+          "subject": "AI Tones — Priority Queue",
+          "owner": "Morgan Chen",
+          "priority": "Critical",
+          "dueDate": "2026-08-07",
+          "notes": "Demo performance reporting record for priority queue; verify evidence and next action before completion."
+        },
+        {
+          "id": "performance-reporting-005",
+          "state": "requested",
+          "reference": "CHUPRESYS-0005",
+          "subject": "AI Tones — Operations Review",
+          "owner": "Riley Patel",
+          "priority": "Low",
+          "dueDate": "2026-08-09",
+          "notes": "Demo performance reporting record for operations review; verify evidence and next action before completion."
+        },
+        {
+          "id": "performance-reporting-006",
+          "state": "requested",
+          "reference": "CHUPRESYS-0006",
+          "subject": "AI Tones — Customer Request",
+          "owner": "Casey Nguyen",
+          "priority": "Medium",
+          "dueDate": "2026-08-11",
+          "notes": "Demo performance reporting record for customer request; verify evidence and next action before completion."
+        },
+        {
+          "id": "performance-reporting-007",
+          "state": "requested",
+          "reference": "CHUPRESYS-0007",
+          "subject": "AI Tones — Compliance Check",
+          "owner": "Cameron Diaz",
+          "priority": "High",
+          "dueDate": "2026-08-13",
+          "notes": "Demo performance reporting record for compliance check; verify evidence and next action before completion."
+        },
+        {
+          "id": "performance-reporting-008",
+          "state": "requested",
+          "reference": "CHUPRESYS-0008",
+          "subject": "AI Tones — Service Window",
+          "owner": "Drew Wilson",
+          "priority": "Critical",
+          "dueDate": "2026-08-15",
+          "notes": "Demo performance reporting record for service window; verify evidence and next action before completion."
+        },
+        {
+          "id": "performance-reporting-009",
+          "state": "requested",
+          "reference": "CHUPRESYS-0009",
+          "subject": "AI Tones — Quality Sample",
+          "owner": "Emerson Clark",
+          "priority": "Low",
+          "dueDate": "2026-08-17",
+          "notes": "Demo performance reporting record for quality sample; verify evidence and next action before completion."
+        },
+        {
+          "id": "performance-reporting-010",
+          "state": "requested",
+          "reference": "CHUPRESYS-0010",
+          "subject": "AI Tones — Management Review",
+          "owner": "Hayden Kim",
+          "priority": "Medium",
+          "dueDate": "2026-08-19",
+          "notes": "Demo performance reporting record for management review; verify evidence and next action before completion."
+        },
+        {
+          "id": "performance-reporting-011",
+          "state": "requested",
+          "reference": "CHUPRESYS-0011",
+          "subject": "AI Tones — Exception Follow-up",
+          "owner": "Jamie Rivera",
+          "priority": "High",
+          "dueDate": "2026-08-21",
+          "notes": "Demo performance reporting record for exception follow-up; verify evidence and next action before completion."
+        },
+        {
+          "id": "performance-reporting-012",
+          "state": "requested",
+          "reference": "CHUPRESYS-0012",
+          "subject": "AI Tones — Evidence Package",
+          "owner": "Kai Thompson",
+          "priority": "Critical",
+          "dueDate": "2026-08-23",
+          "notes": "Demo performance reporting record for evidence package; verify evidence and next action before completion."
+        },
+        {
+          "id": "performance-reporting-013",
+          "state": "requested",
+          "reference": "CHUPRESYS-0013",
+          "subject": "AI Tones — Planning Cycle",
+          "owner": "Logan Shah",
+          "priority": "Low",
+          "dueDate": "2026-08-25",
+          "notes": "Demo performance reporting record for planning cycle; verify evidence and next action before completion."
+        },
+        {
+          "id": "performance-reporting-014",
+          "state": "requested",
+          "reference": "CHUPRESYS-0014",
+          "subject": "AI Tones — Performance Review",
+          "owner": "Parker Evans",
+          "priority": "Medium",
+          "dueDate": "2026-08-27",
+          "notes": "Demo performance reporting record for performance review; verify evidence and next action before completion."
+        },
+        {
+          "id": "performance-reporting-015",
+          "state": "requested",
+          "reference": "CHUPRESYS-0015",
+          "subject": "AI Tones — Final Verification",
+          "owner": "Quinn Murphy",
+          "priority": "High",
+          "dueDate": "2026-08-29",
+          "notes": "Demo performance reporting record for final verification; verify evidence and next action before completion."
         }
       ]
     }
-  ]
+  ],
+  "resources": []
 }

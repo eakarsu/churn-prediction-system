@@ -11,10 +11,10 @@
     "leads",
     "referral"
   ],
-  "featureCount": 318,
-  "candidateFeatureCount": 430,
-  "eliminatedSimilarFeatures": 112,
-  "evidenceCount": 997,
+  "featureCount": 256,
+  "candidateFeatureCount": 355,
+  "eliminatedSimilarFeatures": 99,
+  "evidenceCount": 815,
   "aiPageCount": 0,
   "sourceAIPageCount": 0,
   "featureEvidencePolicy": "Existing source routes, pages, APIs, models, schemas, and navigation only",
@@ -25,6 +25,6 @@
     "seededTables": 0,
     "seededRows": 0
   },
-  "visibleFeatureCount": 189,
+  "visibleFeatureCount": 125,
   "featureVisibilityMode": "source-backed-fallback"
 }
